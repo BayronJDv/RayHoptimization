@@ -8,18 +8,14 @@ sudo apt install -y docker.io
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# (Opcional) Permite al usuario ubuntu usar docker sin sudo
+# Permite al usuario ubuntu usar docker sin sudo
 sudo usermod -aG docker ubuntu
 
 # Espera que Docker esté completamente listo
 sleep 5
 
-# Ejecuta el contenedor con la variable de entorno
+# Ejecuta el contenedor con política de reinicio
 docker run -d -p 8080:80 \
-  -e API_URL="https://api.tu-produccion.com" \
-  tu-imagen-react:ports
+  --restart unless-stopped \
+  bayronh/rayclientv6:latest
 
-#reemplazar la imagen segun sea el caso 
-# client = bayronj/rayclientv4:latest
-# api = bayronj/rayapi:latest
-# worker = bayronj/rayworker:latest

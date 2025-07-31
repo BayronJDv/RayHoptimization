@@ -21,6 +21,7 @@ EXPOSE 5000
 EXPOSE 6379  
 EXPOSE 8265
 EXPOSE 6379
+EXPOSE 10001
 
 # Iniciar servidor Ray en el puerto 6379
 CMD ray start --head --port=6379 --node-ip-address=0.0.0.0 && python app.py
