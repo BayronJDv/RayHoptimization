@@ -12,9 +12,6 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-ENV API_URL="http://api.default.com"
-
-
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
@@ -22,4 +19,5 @@ CMD ["nginx", "-g", "daemon off;"]
 # Construir la imagen:
 # docker build -t bayronj/rayclient .
 #comando para correr la imagen
-# docker run -p 5173:5173 --network host -e VITE_API_URL=http://10.0.136.9:5000 bayronj/rayclient
+#   docker run -d -p 8080:80 \
+#   bayronj/rayclientv5
