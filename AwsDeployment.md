@@ -1,57 +1,57 @@
-# Instrucciones para Despliegue de Ray-HOptimization en AWS
+# Despliegue de Arquitectura AWS con Cliente, Load Balancer y Clúster Privado
 
-## 1. Crear la VPC y Subredes
-- Crea una VPC (ejemplo: `rayhov1`).
-- Crea dos subredes: una pública y una privada.
-- Configura un NAT Gateway para permitir que las instancias en la subred privada accedan a internet.
+Este documento describe los pasos necesarios para implementar una arquitectura distribuida en AWS con una separación clara entre los servicios /api, /client, /workers.
 
-## 2. Crear Security Groups
+---
 
-### 2.1. client-sg (para la instancia cliente)
-- Inbound:
-  - HTTP (80) desde 0.0.0.0/0
-  - HTTPS (443) desde 0.0.0.0/0
-  - SSH (22) solo desde tu IP
-  - TCP (5173) desde 0.0.0.0/0 (para acceso al frontend)
+## 🧱 Estructura General
 
-### 2.2. head-sg (para la instancia head de Ray)
-- Inbound:
-  - Permitir todo el tráfico desde `client-sg`
-  - Permitir todo el tráfico desde `workers-internal-sg`
+- **VPC** con dos subredes:
+  - Subred Pública (para Cliente y Load Balancer)
+  - Subred Privada (para Head Node y Workers)
+- **Application Load Balancer (ALB)** para enrutar tráfico externo al nodo principal (Head).
+- **Elastic IP** para acceso fijo desde el exterior.
+- **Instancias EC2** para Cliente, Head Node y Workers.
 
-### 2.3. workers-internal-sg (para los workers de Ray)
-- Inbound:
-  - Permitir todo el tráfico desde `head-sg`
-  - Permitir todo el tráfico desde `workers-internal-sg`
+---
 
-## 3. Lanzar Instancias
+## 🛠️ Pasos para Implementar
 
-### 3.1. Instancia Head (Ray Head Node)
-- AMI recomendada: Ubuntu Server
-- Ubicación: subred privada
-- Security Group: `head-sg`
-- Script de inicio (user data): `headinit.bash`
+### 1. Crear VPC y Subredes
+- Crear una **VPC personalizada**.
+- Crear **una subred pública** y **una subred privada** en la misma región (por ejemplo, `us-east-1a`).
+- Activar `Auto-assign public IPv4` en la subred pública.
 
-### 3.2. Instancia Cliente
-- AMI recomendada: Ubuntu Server
-- Ubicación: subred pública
-- Security Group: `client-sg`
-- Script de inicio (user data): `workerinit.bash`
+### 2. Crear Internet Gateway
+- Crear un **Internet Gateway** y asociarlo a la VPC.
+- Editar la **tabla de rutas** de la subred pública para enrutar tráfico `0.0.0.0/0` hacia el Internet Gateway.
 
-> **Nota:** Desde esta instancia puedes conectarte por SSH y ejecutar el script `peticion.py` usando la IP privada de la instancia head, o acceder al frontend si lo tienes desplegado.
+### 3. Lanzar Instancias EC2
+- **Cliente**:
+  - En la subred pública.
+  - Asignar una **Elastic IP**.
+- **Head Node**:
+  - En la subred privada.
+  - Sin IP pública.
+- **Workers**:
+  - En la subred privada.
+  - Sin IP pública.
+- Asignar roles IAM y claves SSH según necesidad.
 
-### 3.3. Instancias Worker
-- AMI recomendada: Ubuntu Server
-- Ubicación: subred privada
-- Security Group: `workers-internal-sg`
-- Script de inicio (user data): `worker.bash`
+### 4. Configurar Elastic IP
+- Asociar la **Elastic IP** al Cliente.
 
-## 4. Pruebas y Ejecución
+### 5. Configurar Application Load Balancer (ALB)
+- Crear un **ALB**:
+  - Escoger la VPC creada.
+  - Asociarlo a la subred pública.
+- Crear un **Target Group** para el Head Node.
+- Configurar un **Listener HTTP/HTTPS** para enrutar solicitudes hacia el target group.
 
-- Una vez desplegadas las instancias, puedes probar la ejecución secuencial y paralela conectándote por SSH a la instancia cliente y ejecutando `peticion.py`.
-- Para pruebas distribuidas completas, asegúrate de que los workers estén corriendo y conectados al head node.
-- El frontend puede ser accedido desde el navegador usando la IP pública de la instancia cliente (puerto 5173).
+### 6. Configurar Grupos de Seguridad
+- **Cliente**: permitir SSH (`puerto 22`) desde tu IP.
+- **ALB**: permitir tráfico HTTP/HTTPS (`puertos 80/443`) desde Internet.
+- **Head Node**: permitir tráfico solo desde el ALB.
+- **Workers**: permitir tráfico solo desde el Head Node (por ejemplo, puertos personalizados para RPC/comunicación interna).
 
-- ray start --address=172.17.0.2:6379 && tail -f /dev/null
-- export VITE_API_URL=https://tu-api-en-ec2.com
-
+---
