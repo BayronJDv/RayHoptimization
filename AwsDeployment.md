@@ -55,3 +55,7 @@ Este documento describe los pasos necesarios para implementar una arquitectura d
 - **Workers**: permitir tráfico solo desde el Head Node (por ejemplo, puertos personalizados para RPC/comunicación interna).
 
 ---
+
+## 📌 Notas
+
+- la arquitectura puede ser mejorada lanzando mas intancias de tipo y api, añadiendolas al grupo de destino del ALB 
