@@ -15,17 +15,11 @@ sudo usermod -aG docker ubuntu
 sleep 5
 
 # Ejecuta el contenedor con la variable de entorno
-docker run -d \
-  -e VITE_API_URL="ip:puertodelback" \
-  -p 5000:5000 \
-  --name mi-api \
-  tu_usuario/tu_imagen:tag
+docker run -d -p 8080:80 \
+  -e API_URL="https://api.tu-produccion.com" \
+  tu-imagen-react:ports
 
-# imagen del Cliente
-# bayronj/rayhoclient:latest
-
-# imagen del Servidor
-# bayronj/rayhoapi:latest
-
-# imagen del Worker
-# bayronj/rayhoworker:latest
+#reemplazar la imagen segun sea el caso 
+# client = bayronj/rayclientv4:latest
+# api = bayronj/rayapi:latest
+# worker = bayronj/rayworker:latest
