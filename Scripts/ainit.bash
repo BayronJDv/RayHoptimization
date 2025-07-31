@@ -15,12 +15,7 @@ sudo usermod -aG docker ubuntu
 sleep 5
 
 # Ejecuta el contenedor con política de reinicio
-docker run -d \
-  --name ray_head \
-  -p 6379:6379 \          # Puerto principal de Ray
-  -p 8265:8265 \          # Dashboard de Ray (opcional)
-  -p 10001:10001 \        # Puerto para objetos (object store)
-  -p 5000:5000 \          # Puerto para api (object store)
-  bayronj/rayapi:latest
+docker run -d --name ray_head -p 6379:6379 -p 8265:8265 -p 10001:10001 -p 5000:5000 bayronj/rayapi:latest
+
 
 

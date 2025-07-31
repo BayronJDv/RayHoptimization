@@ -15,11 +15,8 @@ sudo usermod -aG docker ubuntu
 sleep 5
 
 # Ejecuta el contenedor con política de reinicio
-docker run -d -it \
-  --name ray-worker \
-  --network host \
-  --restart unless-stopped \
-  bayronj/raywork:latest
+docker run -d -it --name ray-worker --network host --restart unless-stopped bayronj/raywork:latest
 
 # Conecta el worker al head de Ray
-docker exec -it ray-worker bash -c "ray start --address=10.0.138.52:6379 && tail -f /dev/null"
+docker exec -it ray-worker bash -c "ray start --address=10.0.139.73:6379 && tail -f /dev/null"
+

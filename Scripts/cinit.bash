@@ -15,7 +15,4 @@ sudo usermod -aG docker ubuntu
 sleep 5
 
 # Ejecuta el contenedor con política de reinicio
-docker run -d -p 8080:80 \
-  --restart unless-stopped \
-  bayronh/rayclientv6:latest
-
+docker run -d -p 8080:80 --restart unless-stopped bayronj/rayclientvf:latest
