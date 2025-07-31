@@ -214,11 +214,11 @@ function NeuralNetworkForm({ mode }) {
 
     try {
       const response = await api.post(endpoint, requestData);
-      console.log('Respuesta del servidor:', response.data);
+      console.log('Respuesta del servidor:', response);
       
       setResultModal({ 
         isOpen: true, 
-        data: response.data,
+        data: response,
         error: null 
       });
     } catch (error) {
@@ -576,7 +576,7 @@ function NeuralNetworkForm({ mode }) {
               </ul>
               <p><strong>Mejor puntuación:</strong> {resultModal.data.best_score}</p>
               <p><strong>Tiempo de búsqueda:</strong> {resultModal.data.search_time} segundos</p>
-              {resultModal.nodes_used && (
+              {resultModal.data.nodes_used && (
                 <p><strong>Nodos usados:</strong> {resultModal.data.nodes_used} </p>
               )}              
               <p><strong>Predicción final:</strong> {resultModal.data.prediction === 1 ? 'Positiva' : 'Negativa'}</p>
