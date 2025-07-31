@@ -21,6 +21,6 @@ docker run -d \
   -p 8265:8265 \          # Dashboard de Ray (opcional)
   -p 10001:10001 \        # Puerto para objetos (object store)
   -p 5000:5000 \          # Puerto para api (object store)
-  rayproject/ray
+  bayronj/rayapi:latest
 
 

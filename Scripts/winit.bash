@@ -22,4 +22,4 @@ docker run -d -it \
   bayronj/raywork:latest
 
 # Conecta el worker al head de Ray
-docker exec -it ray-worker bash -c "ray start --address=10.0.142.121:6379 && tail -f /dev/null"
+docker exec -it ray-worker bash -c "ray start --address=10.0.138.52:6379 && tail -f /dev/null"
