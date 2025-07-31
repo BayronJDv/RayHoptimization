@@ -133,6 +133,12 @@ function NeuralNetworkForm({ mode }) {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [resultModal, setResultModal] = useState({ 
+    isOpen: false, 
+    data: null,
+    error: null 
+  });
+
   const handleInputChange = (index, value) => {
     const newInputs = [...predictionInputs];
     const input = newInputs[index];
@@ -172,7 +178,7 @@ function NeuralNetworkForm({ mode }) {
     setIsFormValid(isModelValid && arePredictionsValid);
   }, [modelForm, predictionInputs]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!isFormValid) {
@@ -192,17 +198,40 @@ function NeuralNetworkForm({ mode }) {
 
     const requestData = normalizeAndPrepareData(formData);
     
-    console.log('Datos para enviar:', requestData);
     const endpoint = mode === 'distribuido' ? '/parallel-search' : '/sequential-search';
-    api.post(endpoint, requestData)
-      .then(response => {
-        console.log('Respuesta del servidor:', response);
-        setIsProcessing(false);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        setIsProcessing(false);
+    console.log('Enviando datos al servidor:', requestData);
+    console.log('Hacia la url:', endpoint);
+    const mockResponse = {
+      "best_params": {  "hidden_layer": [5,10,15],
+                        "activation": 'relu',
+                        "solver": '"adam',
+                        "alpha": '0.001',
+                        "max_iter": '50' },
+      "best_score": 0.85,
+      "search_time": 12.34,
+      "prediction": 1
+    }
+
+    try {
+      const response = await api.post(endpoint, requestData);
+      console.log('Respuesta del servidor:', response.data);
+      
+      setResultModal({ 
+        isOpen: true, 
+        data: response.data,
+        error: null 
       });
+    } catch (error) {
+      console.error('Error:', error);
+      
+      setResultModal({
+        isOpen: true,
+        data: null,
+        error: 'Ocurrió un error al procesar la solicitud. Por favor intente nuevamente.'
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -533,6 +562,36 @@ function NeuralNetworkForm({ mode }) {
           </p>
         )}
       </div>
+
+      {resultModal.isOpen && (
+        <div className="fixed inset-0 min-h-[120vh] z-50 flex items-center justify-center bg-black bg-opacity-50 -translate-y-40">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full space-y-4 animate-fade-in transform ">
+            <h3 className="text-2xl font-bold text-gray-800">Resultado del Modelo</h3>
+            <div className="text-gray-700 space-y-2 text-sm">
+              <p><strong>Parámetros óptimos:</strong></p>
+              <ul className="list-disc list-inside ml-4">
+                {Object.entries(resultModal.data.best_params).map(([key, value]) => (
+                  <li key={key}><strong>{key}:</strong> {Array.isArray(value) ? value.join(', ') : value}</li>
+                ))}
+              </ul>
+              <p><strong>Mejor puntuación:</strong> {resultModal.data.best_score}</p>
+              <p><strong>Tiempo de búsqueda:</strong> {resultModal.data.search_time} segundos</p>
+              {resultModal.nodes_used && (
+                <p><strong>Nodos usados:</strong> {resultModal.data.nodes_used} </p>
+              )}              
+              <p><strong>Predicción final:</strong> {resultModal.data.prediction === 1 ? 'Positiva' : 'Negativa'}</p>
+            </div>
+            <div className="text-right">
+              <button
+                onClick={() => setResultModal({ isOpen: false, data: null })}
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
